@@ -5,9 +5,19 @@
 package it.polito.tdp.PremierLeague;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import org.jgrapht.Graph;
+import org.jgrapht.graph.DefaultWeightedEdge;
+
+import it.polito.tdp.PremierLeague.model.Adiacenza;
+import it.polito.tdp.PremierLeague.model.ComparatoreDelta;
 import it.polito.tdp.PremierLeague.model.Model;
+import it.polito.tdp.PremierLeague.model.Player;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -17,6 +27,8 @@ import javafx.scene.control.TextField;
 public class FXMLController {
 	
 	private Model model;
+	Graph<Player, DefaultWeightedEdge> grafo;
+	boolean grafoCreato = false;
 
     @FXML // ResourceBundle that was given to the FXMLLoader
     private ResourceBundle resources;
@@ -44,7 +56,28 @@ public class FXMLController {
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
-
+    	String n = txtGoals.getText();
+    	if(n.equals("")) 
+    		txtResult.setText("Inserisci un numero");
+    	else {
+    	double media = 0.0;
+    	try {
+    		media = Double.parseDouble(n);
+    		//creo grafo
+    		this.model.creaGrafo(media);
+    		this.grafo = this.model.getGrafo();
+    		
+    		//STAMPO STATISTICHE
+    		txtResult.setText("GRAFO CREATO");
+    		txtResult.appendText("\n# VERTICI : "+this.grafo.vertexSet().size());
+    		txtResult.appendText("\n#ARCHI : "+this.grafo.edgeSet().size());
+    		
+    		this.grafoCreato = true;
+    	}catch(NumberFormatException e) {
+    		e.printStackTrace();
+    		txtResult.setText("Devi inserire un numero");
+    	}
+    	}
     }
 
     @FXML
@@ -54,7 +87,42 @@ public class FXMLController {
 
     @FXML
     void doTopPlayer(ActionEvent event) {
-
+    	//if(this.grafo.vertexSet().size() == 0) {
+    	//if(this.grafo.equals(null)) {
+    	if(this.grafoCreato == false) {
+    		txtResult.setText("DEVI PRIMA CREARE IL GRAFO");
+    	}else {
+    		//CERCO TOP PLAYER
+    		Player best = null;
+    		int gradoBest = 0;
+    		for(Player p : this.grafo.vertexSet()) {
+    			//NUMERO DI GIOCATORI BATTUTI DA p
+    			int gradoP = grafo.outgoingEdgesOf(p).size();
+    			//oppure grafo.DegreeOf(p);
+    			if(gradoP > gradoBest)
+    				best = p;    			
+    		}
+    		
+    		//HO TROVATO IL BEST
+    		txtResult.setText("IL GIOCATORE MIGLIORE E': \n"+best.toString()+"\nHA BATTUTO: ");
+    		
+    		//ORDINO LA LISTA DI AVVERSARI
+    		List<DefaultWeightedEdge> archi = new ArrayList<>();
+    		archi.addAll(grafo.outgoingEdgesOf(best));
+    		List<Player> avversari = new ArrayList<>();
+    		
+    		//ORDINO GLI ARCHI IN BASE AL DELTA DECRESCENTE
+    		Collections.sort(archi, new ComparatoreDelta(grafo));
+    		//POPOLO LA LISTA DI AVVERSARI
+    		for(DefaultWeightedEdge e : archi) {
+    			avversari.add(this.grafo.getEdgeTarget(e));
+    			txtResult.appendText("\n"+grafo.getEdgeTarget(e).toString()+ " -- "+grafo.getEdgeWeight(e));
+    		}
+    	
+  
+    		
+    		
+    	}
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -71,4 +139,6 @@ public class FXMLController {
     public void setModel(Model model) {
     	this.model = model;
     }
+    
 }
+
