@@ -127,6 +127,7 @@ public class Model {
 			ricorsiva(parziale, nuovaDaTestare, k);
 			parziale.remove(p); //backtracking 
 			//PERO' UNA VOLTA RAGGIUNTI I PRIMI 3 ELEMENTI LA DIMENSIONE RIMANE COSTANTE CON QUEI TRE, NON RESCO A RIDURRE LA DIMENSIONE
+			//OK ORA SONO RIUSCITA
 		}
 	}
 	
