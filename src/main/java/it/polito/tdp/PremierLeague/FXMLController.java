@@ -15,7 +15,8 @@ import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
 import it.polito.tdp.PremierLeague.model.Adiacenza;
-import it.polito.tdp.PremierLeague.model.ComparatoreDelta;
+import it.polito.tdp.PremierLeague.model.Avversario;
+//import it.polito.tdp.PremierLeague.model.ComparatoreDelta;
 import it.polito.tdp.PremierLeague.model.Model;
 import it.polito.tdp.PremierLeague.model.Player;
 import javafx.event.ActionEvent;
@@ -82,12 +83,39 @@ public class FXMLController {
 
     @FXML
     void doDreamTeam(ActionEvent event) {
-
+    	if(this.grafoCreato == false) {
+    		txtResult.setText("DEVI PRIMA CREARE IL GRAFO");
+    	}else {
+    		//calcolo il dream team
+    		String n = txtK.getText();
+    		Integer k = null;
+    		try {
+    			k = Integer.parseInt(n);
+    			
+    		}catch(NumberFormatException e) {
+    			e.printStackTrace();
+    			txtResult.setText("INSERIRE VALORE NUMERICO E INTERO");
+    		}
+    		if(k!=null) {
+    			if(k<0)
+    				txtResult.setText("K DEVE ESSERE POSITIVO");
+    			else {
+    				//CREO TEAM 
+    				this.model.calcolaDreamTeam(k);
+    				List<Player> best = this.model.getBest();
+    				txtResult.setText("DREAM TEAM\n");
+    				for(Player p : best) {
+    					txtResult.appendText(p.toString()+"\n");
+    				}
+    			}
+    		}
+    		
+    	}
     }
 
     @FXML
     void doTopPlayer(ActionEvent event) {
-    	//if(this.grafo.vertexSet().size() == 0) {
+    	/*//if(this.grafo.vertexSet().size() == 0) {
     	//if(this.grafo.equals(null)) {
     	if(this.grafoCreato == false) {
     		txtResult.setText("DEVI PRIMA CREARE IL GRAFO");
@@ -112,17 +140,28 @@ public class FXMLController {
     		List<Player> avversari = new ArrayList<>();
     		
     		//ORDINO GLI ARCHI IN BASE AL DELTA DECRESCENTE
-    		Collections.sort(archi, new ComparatoreDelta(grafo));
+    		//Collections.sort(archi, new ComparatoreDelta(grafo));
     		//POPOLO LA LISTA DI AVVERSARI
     		for(DefaultWeightedEdge e : archi) {
     			avversari.add(this.grafo.getEdgeTarget(e));
     			txtResult.appendText("\n"+grafo.getEdgeTarget(e).toString()+ " -- "+grafo.getEdgeWeight(e));
-    		}
+			   }
+    	}*/
     	
-  
+    	if(this.grafoCreato == false) {
+    		txtResult.setText("DEVI PRIMA CREARE IL GRAFO");
+    	}else {
+    		Player p = this.model.CalcolaTopPlayer();
+    		List<Avversario> avversari = this.model.giocatoriBattuti();
     		
-    		
+    		txtResult.setText("TOP PLAYER: "+p.toString()+"\n");
+    		for(Avversario a : avversari) {
+    			txtResult.appendText(""+a.toString());
+    		}
     	}
+    	
+    		
+    		
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete

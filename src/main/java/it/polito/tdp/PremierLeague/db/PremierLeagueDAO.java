@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import it.polito.tdp.PremierLeague.model.Action;
 import it.polito.tdp.PremierLeague.model.Adiacenza;
@@ -121,6 +122,50 @@ public class PremierLeagueDAO {
 						result.add(new Adiacenza(p1,t1,p2,t2,delta));
 					}
 					
+				}
+				conn.close();
+				return result;
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+				return null;
+			}
+		
+		}
+		
+		public List<Adiacenza> getAllAdiacenzeCorretto(Map<Integer, Player> mGiocatori){
+			String sql = "SELECT a1.PlayerID as p1, sum(a1.TimePlayed) as tempo1,  a2.PlayerID as p2, sum(a2.TimePlayed) as tempo2,  ABS(SUM(a1.TimePlayed) - SUM(a2.TimePlayed)) as delta "
+					+ "FROM Actions a1, Actions a2 "
+					+ "WHERE a1.TeamID!=a2.TeamID "
+					+ "	AND a1.Starts=1 AND a2.Starts=1 "
+					+ "	AND a1.MatchID=a2.MatchID "
+					+ "	AND a1.PlayerID>a2.PlayerID "
+					+ "GROUP BY a1.PlayerID, a2.PlayerID";
+			
+			List<Adiacenza> result = new ArrayList<>();
+
+			Connection conn = DBConnect.getConnection();
+
+			try {
+				PreparedStatement st = conn.prepareStatement(sql);
+				ResultSet res = st.executeQuery();
+				
+				while (res.next()) {
+
+					if( mGiocatori.containsKey(res.getInt("p1")) && mGiocatori.containsKey(res.getInt("p2")) ) {
+						
+						Player p1 = mGiocatori.get(res.getInt("p1"));
+						Player p2 = mGiocatori.get(res.getInt("p2"));
+						
+						int delta = res.getInt("delta");
+						
+						if(delta != 0) {
+							int t1 = res.getInt("tempo1");
+							int t2 = res.getInt("tempo2");
+							Adiacenza a = new Adiacenza(p1, t1, p2, t2, delta);
+							result.add(a);
+						}
+					}
 				}
 				conn.close();
 				return result;
